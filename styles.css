@@ -1,0 +1,85 @@
+*, p, h1, h2, h3, h4, h5, h6, img, a {
+  margin: 0;
+  padding: 0;
+  font-family: 'IM Fell English SC', serif;
+}
+
+body {
+  background-color: #464f5e;
+}
+
+nav, #log-window, .card {
+  background-color: #dddddd;
+}
+
+#log-window {
+  overflow-y: auto;
+  height: fit-content;
+  max-height: 96vh;
+  top: 15px;
+}
+
+.enemy-container h2, .party-container h2{
+  color: #dddddd;
+  text-align: center;
+}
+
+.partyMemberHP{
+    font-weight: 700;
+    color: red;
+    text-align: center;
+    font-size: 3rem;
+}
+
+.partyMemberCard, .enemyCard {
+  max-width: 225px;
+}
+
+.partyMemberImg, .enemyImg {
+  width: auto;
+  max-height: 100px;
+  object-fit: contain;
+  display: block;
+}
+  
+.enemyName {
+    text-align: center;
+  }
+  
+.enemyHP {
+    color: red;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+  }
+  
+.party-container, .enemy-container{
+  background-color: #28313f;
+}
+
+.notification-banner {
+  position: fixed;
+  top: -100px;
+  left: 0;
+  right: 0;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  font-size: 1rem;
+  z-index: 9999;
+  transition: top 0.5s ease, opacity 0.5s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.notification-banner.show {
+  top: 0;
+  opacity: 1;
+}
+
+#sticky-button {
+  width: 125px !important;
+  margin: 15px;
+  margin-left: auto;
+}
