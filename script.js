@@ -69,8 +69,6 @@ function logMessage(message, mobileNotification){
 }
 
 function saveGameState() {
-    console.log('Game Saved')
-
     const logWindow = document.getElementById('log-window');
     const logHTML = logWindow.innerHTML;
 
@@ -103,7 +101,13 @@ function loadGameState() {
     const saved = localStorage.getItem('gameState');
     if (!saved) return;
 
-    const state = JSON.parse(saved);
+    let state;
+    try {
+        state = JSON.parse(saved);
+    } catch (e) {
+        localStorage.removeItem('gameState');
+        return;
+    }
 
     state.party.forEach(savedMember => {
         const member = partyMembers.find(m => m.slug === savedMember.slug);
@@ -133,7 +137,7 @@ function loadGameState() {
         const savedMember = state.party.find(m => m.slug === member.slug);
         if (savedMember) {
             member.updateHP(savedMember.hp);
-            member.checkIfAlive(member);
+            member.checkIfAlive();
         }
     });
 
@@ -158,13 +162,11 @@ function generateMap(){
     let message = '<center>PLACE THE ENEMY KING</center>Place the Enemy King in tile H8 (top-right)<br /><hr /><br /><center>PLACE WALLS:</center><em>Walls are placed from right to left, top to bottom. Walls may not be placed orthogonally adjacent</em><br /><br />';
    
     while (wallsPlaced < numOfWalls) {
-        if (wallsPlaced < numOfWalls) {
-            let emptySpaces = rollDice(1);
-            if(emptySpaces == 1){
-                message += `Leave ${emptySpaces} empty space<br />`;
-            } else {
-                message += `Leave ${emptySpaces} empty spaces<br />`;
-            }
+        let emptySpaces = rollDice(1);
+        if(emptySpaces == 1){
+            message += `Leave ${emptySpaces} empty space<br />`;
+        } else {
+            message += `Leave ${emptySpaces} empty spaces<br />`;
         }
         let wallSegment = rollDice(1);
         if (wallsPlaced + wallSegment > numOfWalls) {
@@ -182,12 +184,13 @@ function generateMap(){
 
     message += '<hr /><br /><center>PLACE ENEMIES:</center><em>Enemies are placed starting with tile H8, from right to left, top to bottom. Count ALL tiles, if an enemy would go on an occupied space, continue on until a valid space is found</em><br />'
     
-    for (let i = enemies.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [enemies[i], enemies[j]] = [enemies[j], enemies[i]];
+    const placementOrder = [...enemies];
+    for (let i = placementOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [placementOrder[i], placementOrder[j]] = [placementOrder[j], placementOrder[i]];
     }
 
-    enemies.forEach(enemy => {
+    placementOrder.forEach(enemy => {
         let spaces = rollDice(1);
         if(enemy.slug !== 'bKing'){
             message += `<br />Count ${spaces} spaces then place ${enemy.name}`;
@@ -242,11 +245,6 @@ class Entity {
             this.isAlive = false;
             this.hp = 0;
             document.getElementById(this.slug + 'HP').textContent = "DEAD";
-            partyMembers.forEach(member => {  
-                if(!member.isAlive){
-                    member.hideMainBtns();
-                }
-            });
         }
     }
 }
@@ -257,6 +255,29 @@ class PartyMember extends Entity {
         this.suit = suit;
         this.abilityDescription = abilityDescription;
         this.abilityBtnText = abilityBtnText;
+        this.pendingAttackCard = null;
+    }
+
+    resetAttackMode(){
+        this.pendingAttackCard = null;
+        partyMembers.forEach(partyMember => {
+            partyMember.unhideMainBtns();
+        });
+        enemies.forEach(enemy => {
+            document.getElementById(enemy.slug + 'TargetBtn').classList.add('d-none');
+            if(enemy.slug !== 'bKing'){
+                document.getElementById(enemy.slug + 'DirectionBtn').classList.remove('d-none');
+            }
+            enemy.isRangedTarget = false;
+        });
+    }
+
+    checkIfAlive(){
+        super.checkIfAlive();
+        if (!this.isAlive) {
+            document.getElementById(this.slug + 'DmgBtn').classList.add('d-none');
+            document.getElementById(this.slug + 'AbilityBtn').classList.add('d-none');
+        }
     }
 
     attackEnemy(target){
@@ -269,8 +290,12 @@ class PartyMember extends Entity {
 
         if (target.isRangedTarget){
             distance = getDistance();
-            if (distance === null) return;
-            card = diamondsDeck.pullCard();
+            if (distance === null) {
+                this.resetAttackMode();
+                return;
+            }
+            card = this.pendingAttackCard || diamondsDeck.pullCard();
+            this.pendingAttackCard = null;
             action = 'shoots';
         } else {
             card = clubsDeck.pullCard();
@@ -295,17 +320,7 @@ class PartyMember extends Entity {
             target.updateHP(newHP);
         }
 
-        partyMembers.forEach(partyMember => {
-            partyMember.unhideMainBtns();
-        });
-
-        enemies.forEach(enemy => {
-            document.getElementById(enemy.slug + 'TargetBtn').classList.add('d-none');
-            if(enemy.slug !== 'bKing'){
-                document.getElementById(enemy.slug + 'DirectionBtn').classList.remove('d-none');
-            }
-            enemy.isRangedTarget = false;
-        });
+        this.resetAttackMode();
     }
 
     displayPartyMember(){
@@ -384,12 +399,8 @@ class PartyMember extends Entity {
         this.hp -= damage;
             
         if (this.hp <= 0){
-            this.isAlive = false;
-            this.hp = 0;
             logMessage(this.name + " was KILLED");
-            document.getElementById(this.slug + 'HP').textContent = "DEAD";
-            document.getElementById(this.slug + 'DmgBtn').classList.add('d-none');
-            document.getElementById(this.slug + 'AbilityBtn').classList.add('d-none');
+            this.checkIfAlive();
         } else {
             document.getElementById(this.slug + 'HP').textContent = this.hp;
             logMessage(damage + " damage was dealt to the " + this.name + ". " + this.hp + " HP remains.");
@@ -456,14 +467,15 @@ class PartyMember extends Entity {
 
                 }; 
                 
-                message = this.name + ' guards for ' + whiteRook.guardAmount + '.';
+                logMessage(this.name + ' guards for ' + whiteRook.guardAmount + '.');
                 break;
 
             case 'wBishop':
                 card = diamondsDeck.pullCard();
                 const shootAmount = getCardValue(card);
+                this.pendingAttackCard = card;
                 this.initializeAttack();
-                message = this.name + ' shoots for ' + shootAmount + '.';
+                logMessage(this.name + ' shoots for ' + shootAmount + '.');
                 break;
         }
     }
@@ -510,8 +522,10 @@ class PartyMember extends Entity {
 
         logMessage(message);
         partyMembers.forEach(member => {
-            let healBtn = document.getElementById(member.slug + 'HealBtn');
-            healBtn.remove();
+            const healBtn = document.getElementById(member.slug + 'HealBtn');
+            if (healBtn) {
+                healBtn.remove();
+            }
         });
     }
 }
