@@ -111,6 +111,13 @@ body.castle {
     linear-gradient(160deg, var(--felt-red) 0%, var(--felt-red-deep) 100%);
 }
 
+@media (min-width: 992px) {
+  .enemy-container {
+    max-height: calc(100vh - 18rem);
+    overflow-y: auto;
+  }
+}
+
 .party-container h2,
 .enemy-container h2 {
   color: var(--ivory);
@@ -125,15 +132,22 @@ body.castle {
   margin: 0;
 }
 
+#party-window > *,
+#enemy-window > * {
+  min-width: 0;
+}
+
 /* ── Stat cards ── */
 
 .partyMemberCard,
-.enemyCard {
+.enemyCard,
+.card.partyMemberCard,
+.card.enemyCard {
   position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
-  max-width: 100%;
+  max-width: 100% !important;
   border: none;
   border-radius: 3px;
   background: var(--ivory);
@@ -244,6 +258,7 @@ body.castle {
 #log-window {
   position: relative;
   overflow-y: auto;
+  min-height: 12rem;
   max-height: calc(100vh - 2rem);
   padding-left: 2rem !important;
   background:

@@ -380,12 +380,8 @@ class PartyMember extends Entity {
         newDiv.appendChild(portrait);
         newDiv.appendChild(actions);
 
-        const col = document.createElement('div');
-        col.className = 'col-6 col-lg-3';
-        col.appendChild(newDiv);
-
         const partyWindow = document.getElementById('party-window');
-        partyWindow.appendChild(col);
+        partyWindow.appendChild(newDiv);
     }
 
     takeDamage(){
@@ -628,12 +624,8 @@ class Enemy extends Entity {
         newDiv.appendChild(portrait);
         newDiv.appendChild(actions);
 
-        const col = document.createElement('div');
-        col.className = 'col-6 col-lg-3';
-        col.appendChild(newDiv);
-
         const enemyWindow = document.getElementById('enemy-window');
-        enemyWindow.appendChild(col);
+        enemyWindow.appendChild(newDiv);
     }
 
     rollForDirection(){
