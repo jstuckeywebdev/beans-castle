@@ -326,15 +326,37 @@ class PartyMember extends Entity {
     displayPartyMember(){
         const newDiv = document.createElement('div');
         newDiv.id = this.slug + 'Card';
-        newDiv.classList.add("card", 'p-3', 'd-flex', 'flex-column', 'partyMemberCard');
-        
-        const newImg = document.createElement("img");
+        newDiv.classList.add('card', 'partyMemberCard');
+
+        const header = document.createElement('div');
+        header.classList.add('entity-header');
+
+        const name = document.createElement('h4');
+        name.textContent = this.name;
+
+        const hp = document.createElement('p');
+        hp.classList.add('partyMemberHP');
+        hp.id = this.slug + 'HP';
+        hp.textContent = this.hp;
+
+        header.appendChild(name);
+        header.appendChild(hp);
+
+        const portrait = document.createElement('div');
+        portrait.classList.add('entity-portrait');
+
+        const newImg = document.createElement('img');
         newImg.src = this.imageSrc;
+        newImg.alt = this.name;
         newImg.classList.add('partyMemberImg');
-         
+        portrait.appendChild(newImg);
+
+        const actions = document.createElement('div');
+        actions.classList.add('entity-actions');
+
         const abilityBtn = document.createElement('a');
         abilityBtn.id = this.slug + 'AbilityBtn';
-        abilityBtn.classList.add('btn', 'btn-primary', 'mainPartyMemberBtns', 'mt-3');
+        abilityBtn.classList.add('btn', 'btn-primary', 'mainPartyMemberBtns');
         if(this.slug == 'wKnight' || this.slug == 'wBishop'){
             abilityBtn.href='#enemy-window';
         }
@@ -345,28 +367,20 @@ class PartyMember extends Entity {
 
         const dmgBtn = document.createElement('a');
         dmgBtn.id = this.slug + 'DmgBtn';
-        dmgBtn.classList.add('btn', 'btn-danger', 'mt-3');
+        dmgBtn.classList.add('btn', 'btn-danger');
         dmgBtn.onclick = () => {
             this.takeDamage();
         };
-        dmgBtn.textContent = "Roll for Damage";
-        
-        const name = document.createElement('h4');
-        name.textContent = this.name;
-        name.classList.add('text-center');
-        
-        const hp = document.createElement('p');
-        hp.classList.add('partyMemberHP');
-        hp.id = this.slug + "HP";
-        hp.textContent = this.hp;
+        dmgBtn.textContent = 'Roll for Damage';
 
-        const partyWindow = document.getElementById("party-window");
+        actions.appendChild(abilityBtn);
+        actions.appendChild(dmgBtn);
+
+        const partyWindow = document.getElementById('party-window');
         partyWindow.appendChild(newDiv);
-        newDiv.appendChild(name);
-        newDiv.append(hp);
-        newDiv.appendChild(newImg);
-        newDiv.appendChild(abilityBtn);
-        newDiv.appendChild(dmgBtn);
+        newDiv.appendChild(header);
+        newDiv.appendChild(portrait);
+        newDiv.appendChild(actions);
     }
 
     takeDamage(){
@@ -446,7 +460,7 @@ class PartyMember extends Entity {
                         partyMember.unhideMainBtns(partyMember);
                     };
                     partyMember.hideMainBtns(partyMember);
-                    document.getElementById(partyMember.slug + 'Card').appendChild(healBtn);
+                    document.getElementById(partyMember.slug + 'Card').querySelector('.entity-actions').appendChild(healBtn);
                 });
                 break;
 
@@ -550,20 +564,34 @@ class Enemy extends Entity {
     displayEnemy(){
         const newDiv = document.createElement('div');
         newDiv.id = this.slug + 'Card';
-        newDiv.classList.add("card", 'p-3', 'mb-2', 'd-flex', 'flex-column', 'enemyCard', 'align-items-center');
-        
-        const newImg = document.createElement("img");
-        newImg.src = this.imageSrc;
-        newImg.classList.add('enemyImg');
-                 
+        newDiv.classList.add('card', 'enemyCard');
+
+        const header = document.createElement('div');
+        header.classList.add('entity-header');
+
         const name = document.createElement('h5');
         name.textContent = this.name;
         name.classList.add('enemyName');
-        
+
         const hp = document.createElement('p');
         hp.classList.add('enemyHP');
-        hp.id = this.slug + "HP";
+        hp.id = this.slug + 'HP';
         hp.textContent = this.hp;
+
+        header.appendChild(name);
+        header.appendChild(hp);
+
+        const portrait = document.createElement('div');
+        portrait.classList.add('entity-portrait');
+
+        const newImg = document.createElement('img');
+        newImg.src = this.imageSrc;
+        newImg.alt = this.name;
+        newImg.classList.add('enemyImg');
+        portrait.appendChild(newImg);
+
+        const actions = document.createElement('div');
+        actions.classList.add('entity-actions');
 
         const targetBtn = document.createElement('a');
         targetBtn.classList.add('btn', 'btn-danger', 'd-none');
@@ -577,24 +605,25 @@ class Enemy extends Entity {
                 whiteKnight.attackEnemy(this);
             }
         };
-        
+
         const rollForDirectionBtn = document.createElement('a');
-        rollForDirectionBtn.classList.add('btn', 'btn-warning')
+        rollForDirectionBtn.classList.add('btn', 'btn-warning');
         rollForDirectionBtn.id = `${this.slug}DirectionBtn`;
         rollForDirectionBtn.textContent = 'Roll For Direction';
-        rollForDirectionBtn.onclick = () =>{
+        rollForDirectionBtn.onclick = () => {
             this.rollForDirection();
+        };
+
+        actions.appendChild(targetBtn);
+        if(this.slug != 'bKing'){
+            actions.appendChild(rollForDirectionBtn);
         }
 
-        const enemyWindow = document.getElementById("enemy-window");
+        const enemyWindow = document.getElementById('enemy-window');
         enemyWindow.appendChild(newDiv);
-        newDiv.appendChild(name);
-        newDiv.append(hp);
-        newDiv.appendChild(newImg);
-        newDiv.appendChild(targetBtn);
-        if(this.slug != 'bKing'){
-            newDiv.appendChild(rollForDirectionBtn);
-        }
+        newDiv.appendChild(header);
+        newDiv.appendChild(portrait);
+        newDiv.appendChild(actions);
     }
 
     rollForDirection(){
