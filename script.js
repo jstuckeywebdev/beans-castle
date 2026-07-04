@@ -326,7 +326,7 @@ class PartyMember extends Entity {
     displayPartyMember(){
         const newDiv = document.createElement('div');
         newDiv.id = this.slug + 'Card';
-        newDiv.classList.add('card', 'partyMemberCard');
+        newDiv.classList.add('partyMemberCard');
 
         const header = document.createElement('div');
         header.classList.add('entity-header');
@@ -376,11 +376,16 @@ class PartyMember extends Entity {
         actions.appendChild(abilityBtn);
         actions.appendChild(dmgBtn);
 
-        const partyWindow = document.getElementById('party-window');
-        partyWindow.appendChild(newDiv);
         newDiv.appendChild(header);
         newDiv.appendChild(portrait);
         newDiv.appendChild(actions);
+
+        const col = document.createElement('div');
+        col.className = 'col-6 col-lg-3';
+        col.appendChild(newDiv);
+
+        const partyWindow = document.getElementById('party-window');
+        partyWindow.appendChild(col);
     }
 
     takeDamage(){
@@ -564,7 +569,7 @@ class Enemy extends Entity {
     displayEnemy(){
         const newDiv = document.createElement('div');
         newDiv.id = this.slug + 'Card';
-        newDiv.classList.add('card', 'enemyCard');
+        newDiv.classList.add('enemyCard');
 
         const header = document.createElement('div');
         header.classList.add('entity-header');
@@ -619,11 +624,16 @@ class Enemy extends Entity {
             actions.appendChild(rollForDirectionBtn);
         }
 
-        const enemyWindow = document.getElementById('enemy-window');
-        enemyWindow.appendChild(newDiv);
         newDiv.appendChild(header);
         newDiv.appendChild(portrait);
         newDiv.appendChild(actions);
+
+        const col = document.createElement('div');
+        col.className = 'col-6 col-lg-3';
+        col.appendChild(newDiv);
+
+        const enemyWindow = document.getElementById('enemy-window');
+        enemyWindow.appendChild(col);
     }
 
     rollForDirection(){
